@@ -2,6 +2,10 @@
 
 Thanks for helping make Espanso Snippets Manager better! Bug reports, ideas and pull requests are all welcome.
 
+## Questions and ideas
+
+Ask in [Discussions](https://github.com/gilikarn/Espanso-Snippets-Manager/discussions). That keeps Issues for confirmed bugs and agreed work.
+
 ## Reporting a problem
 
 [Open an issue](https://github.com/gilikarn/Espanso-Snippets-Manager/issues/new/choose). It helps a lot if you include:

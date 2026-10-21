@@ -153,7 +153,15 @@ npm run package          # release archives in dist/
 
 The UI lives in [`src/index.html`](src/index.html), with no framework and no build step beyond inlining js-yaml. The helpers are [`src/server.ps1`](src/server.ps1) and [`src/server.py`](src/server.py), and they implement the same small API. Test against the sample files in `tests/fixtures` with `python3 src/server.py --config-dir tests/fixtures/espanso` (after `npm run build`, use the copy in `dist/`).
 
-Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Looking for a place to start? Try an issue labelled [good first issue](https://github.com/gilikarn/Espanso-Snippets-Manager/labels/good%20first%20issue).
+
+## Getting help
+
+- **Questions and ideas:** [Discussions](https://github.com/gilikarn/Espanso-Snippets-Manager/discussions)
+- **Bugs:** [Issues](https://github.com/gilikarn/Espanso-Snippets-Manager/issues/new/choose)
+- **Security problems:** please report privately, see [SECURITY.md](SECURITY.md)
+
+This is a spare-time project. Issues and pull requests are read and answered, but sometimes not quickly. Thanks for your patience!
 
 ## License
 

@@ -4,10 +4,14 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: monthly
-    groups:
-      dev-dependencies:
-        patterns: ["*"]
+    ignore:
+      # js-yaml is bundled into the page; a new major changes YAML output and needs a careful, tested migration.
+      - dependency-name: js-yaml
+        update-types: ["version-update:semver-major"]
