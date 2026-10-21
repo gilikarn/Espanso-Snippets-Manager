@@ -24,7 +24,7 @@
     "screenshots": "npm run build && node scripts/screenshots.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "1.56.1",
+    "@playwright/test": "1.64.1",
     "js-yaml": "4.1.0"
   }
 }
