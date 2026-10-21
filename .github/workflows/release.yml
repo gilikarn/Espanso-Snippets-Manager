@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)publish, e.g. v1.0.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - name: Check the tag matches package.json
+        run: |
+          v=$(node -p "require('./package.json').version")
+          if [ "v$v" != "$TAG" ]; then echo "::error::Tag $TAG does not match package.json version $v"; exit 1; fi
+      - run: npm run package
+      - name: Smoke test the built app
+        run: python -m unittest discover -s tests -p "test_*.py"
+      - name: Release notes from CHANGELOG.md
+        run: |
+          v="${TAG#v}"
+          awk -v v="$v" '
+            /^## / { if (p) exit; if (index($0, "[" v "]")) { p=1; next } }
+            /^\[[^]]+\]: / { if (p) exit }
+            p { print }' CHANGELOG.md > notes.md
+          cat >> notes.md <<'NOTES'
+
+          ### Install
+          **Windows** (PowerShell): `irm https://raw.githubusercontent.com/${{ github.repository }}/main/install/install.ps1 | iex`
+
+          **macOS / Linux**: `curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/install/install.sh | sh`
+
+          Or download `espanso-snippets-manager.zip`, extract it and run `install.ps1` (Windows) or `install.sh` (macOS/Linux).
+          NOTES
+          cat notes.md
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/espanso-snippets-manager.zip dist/espanso-snippets-manager.tar.gz dist/SHA256SUMS.txt --clobber
+          else
+            gh release create "$TAG" dist/espanso-snippets-manager.zip dist/espanso-snippets-manager.tar.gz dist/SHA256SUMS.txt \
+              --title "$TAG" --notes-file notes.md --verify-tag
+          fi

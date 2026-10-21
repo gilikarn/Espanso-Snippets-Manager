@@ -1,0 +1,10 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+*.tmp
+.ruff_cache/

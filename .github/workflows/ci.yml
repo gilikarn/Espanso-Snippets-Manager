@@ -1,0 +1,161 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Python syntax (3.8+ compatible)
+        run: |
+          python -m py_compile src/server.py
+          pip install --quiet ruff
+          ruff check --target-version py38 --select E,F,W,B --ignore E501 src/server.py tests/test_server.py
+      - name: Shell scripts
+        run: |
+          shellcheck --version
+          shellcheck -f gcc install/install.sh install/uninstall.sh scripts/package.sh \
+            | sed -E 's/^([^:]+):([0-9]+):([0-9]+): (.*)$/::error file=\1,line=\2,col=\3::\4/' | tee shellcheck.txt
+          test ! -s shellcheck.txt
+      - name: PowerShell files are plain ASCII
+        # Windows PowerShell 5.1 reads BOM-less files as ANSI, so keep them ASCII.
+        run: |
+          if grep -nP '[^\x00-\x7F]' src/*.ps1 install/*.ps1 tests/*.ps1; then
+            echo "::error::Non-ASCII characters found in PowerShell files"; exit 1
+          fi
+
+  test-python:
+    name: Python helper (${{ matrix.os }}, py${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.12"]
+        include:
+          - os: ubuntu-22.04
+            python: "3.8"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Tests
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest discover -s tests -p "test_*.py" -v 2>&1 | tee unittest.log || {
+            grep -E "^(ERROR|FAIL):|Error:|Exception" unittest.log | sort -u | sed 's/^/::error::/'; exit 1; }
+
+  test-powershell:
+    name: PowerShell helper (${{ matrix.shell }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [powershell, pwsh]
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Server tests
+        run: ./tests/server.Tests.ps1
+      - name: PSScriptAnalyzer
+        if: matrix.shell == 'pwsh'
+        run: |
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          $issues = @('src', 'install', 'tests' | ForEach-Object { Invoke-ScriptAnalyzer -Path $_ -Recurse -Severity Error })
+          foreach ($i in $issues) {
+            $file = Resolve-Path -Relative $i.ScriptPath
+            Write-Host "::error file=$file,line=$($i.Line)::$($i.RuleName): $($i.Message)"
+          }
+          if ($issues.Count) { exit 1 }
+
+  test-e2e:
+    name: Editor end-to-end
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v5
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  install-smoke:
+    name: Installer (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Install and uninstall (macOS / Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export HOME="$RUNNER_TEMP/home"; mkdir -p "$HOME"
+          sh dist/espanso-snippets-manager/install.sh
+          test -x "$HOME/.local/bin/espanso-snippets-manager"
+          "$HOME/.local/bin/espanso-snippets-manager" --print-config
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            test -f "$HOME/Applications/Espanso Snippets.app/Contents/Info.plist"
+            plutil -lint "$HOME/Applications/Espanso Snippets.app/Contents/Info.plist"
+          else
+            test -f "$HOME/.local/share/applications/espanso-snippets-manager.desktop"
+          fi
+          sh dist/espanso-snippets-manager/uninstall.sh
+          test ! -e "$HOME/.local/bin/espanso-snippets-manager"
+      - name: Install and uninstall (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & .\dist\espanso-snippets-manager\install.ps1 -NoDesktopShortcut
+          $dest = Join-Path $env:LOCALAPPDATA 'Programs\Espanso Snippets Manager'
+          if (-not (Test-Path "$dest\server.ps1")) { throw 'app not installed' }
+          $lnk = Join-Path ([Environment]::GetFolderPath('StartMenu')) 'Programs\Espanso Snippets.lnk'
+          if (-not (Test-Path $lnk)) { throw 'shortcut missing' }
+          if (-not (Test-Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\EspansoSnippetsManager')) { throw 'uninstall entry missing' }
+          & "$dest\server.ps1" -PrintConfig
+          & "$dest\uninstall.ps1"
+          Start-Sleep -Seconds 4
+          if (Test-Path $lnk) { throw 'shortcut not removed' }
+          if (Test-Path $dest) { throw 'app folder not removed' }

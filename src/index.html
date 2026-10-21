@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espanso Snippets</title>
+<meta name="description" content="A fast, friendly editor for your Espanso snippets.">
+<meta name="generator" content="Espanso Snippets Manager __VERSION__">
+<link rel="icon" href="__FAVICON__">
+<style>
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --surface-2:#fafbfc; --border:#e3e6eb; --border-strong:#cfd4dc;
+  --text:#1c2230; --muted:#677083; --faint:#9aa1af;
+  --accent:#5b5bd6; --accent-hover:#4b4bc4; --accent-soft:#eef0ff; --accent-text:#4343b5;
+  --ok:#14945a; --ok-soft:#e5f6ee; --warn:#b5590b; --warn-soft:#fff3e4; --danger:#cc3a2f; --danger-soft:#fdecea;
+  --chip:#f0f2f5; --chip-text:#2d3446;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.06);
+  --shadow-lg:0 12px 32px rgba(16,24,40,.16),0 2px 6px rgba(16,24,40,.08);
+  --sans:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"Cascadia Code","Cascadia Mono","SF Mono",Menlo,Consolas,ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#111318; --surface:#181b22; --surface-2:#1c2028; --border:#2a2f3a; --border-strong:#3a4150;
+    --text:#e7e9ef; --muted:#9aa1b2; --faint:#6c7385;
+    --accent:#8484f5; --accent-hover:#9696fa; --accent-soft:#24264a; --accent-text:#b4b4ff;
+    --ok:#3fcf8e; --ok-soft:#173327; --warn:#f3a54d; --warn-soft:#3a2a17; --danger:#f2766b; --danger-soft:#3b1f1d;
+    --chip:#252a35; --chip-text:#dfe3ec;
+    --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-lg:0 12px 32px rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111318; --surface:#181b22; --surface-2:#1c2028; --border:#2a2f3a; --border-strong:#3a4150;
+  --text:#e7e9ef; --muted:#9aa1b2; --faint:#6c7385;
+  --accent:#8484f5; --accent-hover:#9696fa; --accent-soft:#24264a; --accent-text:#b4b4ff;
+  --ok:#3fcf8e; --ok-soft:#173327; --warn:#f3a54d; --warn-soft:#3a2a17; --danger:#f2766b; --danger-soft:#3b1f1d;
+  --chip:#252a35; --chip-text:#dfe3ec;
+  --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-lg:0 12px 32px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.45 var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+svg{flex:none}
+
+/* ---------- header ---------- */
+header{height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:-.01em;white-space:nowrap}
+.brand .logo{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center}
+.filesel{position:relative}
+.filebtn{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid var(--border);background:var(--surface-2);border-radius:8px;font-size:13px;color:var(--muted)}
+.filebtn b{color:var(--text);font-weight:600}
+.filebtn:hover{border-color:var(--border-strong)}
+.search{flex:1;max-width:520px;margin:0 auto;position:relative}
+.search input{width:100%;height:34px;border:1px solid var(--border);background:var(--surface-2);border-radius:9px;padding:0 34px 0 34px;outline:none;transition:border-color .15s,box-shadow .15s}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:var(--surface)}
+.search .ico{position:absolute;left:11px;top:9px;color:var(--faint)}
+.search kbd{position:absolute;right:9px;top:8px}
+kbd{font:11px/16px var(--mono);padding:0 5px;border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;color:var(--muted);background:var(--surface)}
+.status{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+.status.on .dot{background:var(--ok);box-shadow:0 0 0 3px var(--ok-soft)}
+.btn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-size:13px;font-weight:500;transition:background .12s,border-color .12s,color .12s}
+.btn:hover{border-color:var(--border-strong);background:var(--surface-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-hover)}
+.btn.primary:disabled{background:var(--chip);border-color:var(--border);color:var(--faint);cursor:default}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--chip);color:var(--text)}
+.btn.danger:hover{color:var(--danger);background:var(--danger-soft);border-color:transparent}
+.btn.sm{height:28px;padding:0 9px;font-size:12.5px}
+.iconbtn{width:32px;padding:0;justify-content:center}
+
+/* ---------- layout ---------- */
+main{display:grid;grid-template-columns:minmax(300px,380px) 1fr;height:calc(100vh - 56px)}
+.side{border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;min-height:0}
+.sidehead{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;gap:8px}
+.count{font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+.sort{border:none;background:transparent;color:var(--muted);font-size:12.5px;padding:2px 4px;border-radius:6px}
+.sort:hover{background:var(--chip)}
+.banner{margin:0 12px 8px;padding:9px 11px;border-radius:9px;background:var(--accent-soft);color:var(--accent-text);font-size:12.5px;display:flex;align-items:center;gap:8px}
+.banner button{margin-left:auto;border:none;background:transparent;color:inherit;font-weight:600;padding:2px 4px;border-radius:5px;white-space:nowrap}
+.banner button:hover{text-decoration:underline}
+.banner .x{margin-left:0;opacity:.7;font-weight:400}
+.list{flex:1;overflow:auto;padding:2px 8px 8px}
+.row{position:relative;display:block;width:100%;text-align:left;border:none;background:transparent;padding:9px 10px 9px 12px;border-radius:9px;margin:1px 0;cursor:pointer}
+.row:hover{background:var(--surface-2)}
+.row.sel{background:var(--accent-soft)}
+.row.sel::before{content:"";position:absolute;left:3px;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--accent)}
+.row .top{display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-height:22px}
+.row .prev{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;unicode-bidi:plaintext}
+.row .prev.empty{color:var(--faint);font-style:italic}
+.row .flags{margin-left:auto;display:flex;gap:4px;align-items:center}
+.row .mod{width:7px;height:7px;border-radius:50%;background:var(--warn)}
+.chip{display:inline-flex;align-items:center;font:12.5px/20px var(--mono);padding:0 7px;border-radius:6px;background:var(--chip);color:var(--chip-text);white-space:nowrap;unicode-bidi:plaintext}
+.row.sel .chip{background:var(--surface)}
+.chip.ph{color:var(--faint);font-family:var(--sans);font-style:italic}
+.tag{font-size:10.5px;font-weight:600;letter-spacing:.03em;padding:1px 6px;border-radius:5px;background:var(--chip);color:var(--muted);text-transform:uppercase}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.sidefoot{padding:10px 12px;border-top:1px solid var(--border)}
+.sidefoot .btn{width:100%;justify-content:center}
+.emptylist{padding:30px 16px;text-align:center;color:var(--muted);font-size:13px}
+
+.pane{overflow:auto;min-height:0}
+.editor{max-width:780px;margin:0 auto;padding:26px 32px 40px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:22px 24px}
+.card + .card{margin-top:16px}
+.sec + .sec{margin-top:22px}
+.lbl{display:flex;align-items:baseline;gap:8px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.lbl .opt{font-weight:400;text-transform:none;letter-spacing:0;color:var(--faint)}
+.hint{font-size:12.5px;color:var(--muted);margin-top:7px}
+.hint code,.mono{font-family:var(--mono);font-size:12px;background:var(--chip);padding:1px 5px;border-radius:4px}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:42px;padding:6px 8px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);cursor:text;transition:border-color .15s,box-shadow .15s}
+.chips:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:var(--surface)}
+.chips .chip{font-size:13.5px;line-height:26px;padding:0 4px 0 9px;gap:2px;background:var(--accent-soft);color:var(--accent-text)}
+.chips .chip button{border:none;background:transparent;color:inherit;opacity:.6;width:20px;height:20px;border-radius:5px;display:grid;place-items:center;padding:0}
+.chips .chip button:hover{opacity:1;background:rgba(127,127,127,.15)}
+.chips input{flex:1;min-width:140px;border:none;outline:none;background:transparent;font:14px var(--mono);padding:4px 2px;unicode-bidi:plaintext}
+
+.tbar{display:flex;align-items:center;gap:2px;flex-wrap:wrap;margin-bottom:6px}
+.tbar .sp{flex:1}
+.seg{display:inline-flex;padding:2px;border-radius:9px;background:var(--chip);gap:2px}
+.seg button{border:none;background:transparent;padding:4px 11px;border-radius:7px;font-size:12.5px;color:var(--muted);font-weight:500;white-space:nowrap}
+.seg button:hover{color:var(--text)}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.seg.wide{display:flex;flex-wrap:wrap}
+.seg.wide button{flex:1;padding:7px 10px}
+textarea.text{width:100%;min-height:120px;resize:vertical;border:1px solid var(--border);border-radius:10px;padding:11px 12px;background:var(--surface-2);outline:none;font-size:14.5px;line-height:1.55;unicode-bidi:plaintext;transition:border-color .15s,box-shadow .15s}
+textarea.text:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:var(--surface)}
+.preview{margin-top:8px;font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:baseline}
+.preview .pv{color:var(--text);white-space:pre-wrap;word-break:break-word;unicode-bidi:plaintext;background:var(--surface-2);border:1px dashed var(--border);border-radius:7px;padding:3px 8px;flex:1}
+.caret{display:inline-block;width:2px;height:1.1em;background:var(--accent);vertical-align:-2px;margin:0 1px;border-radius:1px}
+
+.toggle{display:flex;align-items:flex-start;gap:12px;cursor:pointer;user-select:none}
+.switch{position:relative;width:36px;height:21px;border-radius:21px;background:var(--border-strong);flex:none;transition:background .15s;margin-top:1px}
+.switch::after{content:"";position:absolute;left:2px;top:2px;width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+.toggle input{position:absolute;opacity:0;pointer-events:none}
+.toggle input:checked + .switch{background:var(--accent)}
+.toggle input:checked + .switch::after{transform:translateX(15px)}
+.toggle input:focus-visible + .switch{outline:2px solid var(--accent);outline-offset:2px}
+.toggle .t1{font-weight:500}
+.toggle .t2{font-size:12.5px;color:var(--muted)}
+
+.field{width:100%;height:36px;border:1px solid var(--border);border-radius:9px;padding:0 11px;background:var(--surface-2);outline:none;unicode-bidi:plaintext}
+.field:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:var(--surface)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid2 .sub{font-size:12.5px;color:var(--muted);margin-bottom:5px}
+.actions{display:flex;gap:8px;margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
+.actions .sp{flex:1}
+.note{font-size:12.5px;padding:9px 11px;border-radius:9px;background:var(--warn-soft);color:var(--warn);margin-bottom:14px}
+.note.info{background:var(--accent-soft);color:var(--accent-text)}
+.kept{font-size:12px;color:var(--faint);margin-top:14px}
+
+.try h3{margin:0 0 4px;font-size:14px;font-weight:600}
+.try p{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+.try textarea{width:100%;height:86px;resize:vertical;border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--surface-2);outline:none;font-size:14px;unicode-bidi:plaintext}
+.try textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:var(--surface)}
+.try .res{font-size:12.5px;color:var(--ok);min-height:18px;margin-top:6px}
+
+.blank{height:100%;display:grid;place-items:center;text-align:center;color:var(--muted);padding:30px}
+.blank h2{color:var(--text);font-size:17px;margin:14px 0 6px;font-weight:600}
+.blank .shortcuts{margin-top:18px;display:grid;grid-template-columns:auto auto;gap:7px 12px;font-size:12.5px;text-align:left;justify-content:center;align-items:center}
+.blank .shortcuts kbd{justify-self:end}
+
+/* menus / modal / toast */
+.menu{position:absolute;z-index:30;min-width:230px;background:var(--surface);border:1px solid var(--border);border-radius:11px;box-shadow:var(--shadow-lg);padding:5px}
+.menu button{display:flex;width:100%;align-items:center;gap:10px;border:none;background:transparent;padding:7px 10px;border-radius:7px;text-align:left;font-size:13px}
+.menu button:hover,.menu button.on{background:var(--chip)}
+.menu .m2{margin-left:auto;color:var(--faint);font-size:12px;font-family:var(--mono)}
+.menu hr{border:none;border-top:1px solid var(--border);margin:5px 4px}
+.menu .mh{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;padding:6px 10px 3px;font-weight:600}
+.scrim{position:fixed;inset:0;background:rgba(10,14,22,.35);display:grid;place-items:center;z-index:50;animation:fade .12s}
+.modal{width:min(440px,calc(100vw - 32px));background:var(--surface);border-radius:14px;box-shadow:var(--shadow-lg);padding:22px}
+.modal h3{margin:0 0 6px;font-size:16px}
+.modal p{margin:0 0 14px;color:var(--muted);font-size:13.5px}
+.modal .row2{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.toasts{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:60;align-items:center}
+.toast{display:flex;align-items:center;gap:12px;background:#1f2430;color:#fff;padding:9px 10px 9px 14px;border-radius:10px;box-shadow:var(--shadow-lg);font-size:13px;animation:up .18s ease-out}
+.toast.err{background:var(--danger)}
+.toast button{border:none;background:rgba(255,255,255,.12);color:#fff;padding:4px 10px;border-radius:6px;font-weight:600;font-size:12.5px}
+.toast button:hover{background:rgba(255,255,255,.22)}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.hidden{display:none!important}
+
+@media (max-width:820px){
+  main{grid-template-columns:1fr;grid-template-rows:42% 58%}
+  .side{border-right:none;border-bottom:1px solid var(--border)}
+  .sidefoot{display:none}
+  .search kbd{display:none}
+  .status span.txt{display:none}
+  .editor{padding:16px}
+  .grid2{grid-template-columns:1fr}
+  .brand .name{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M3 8h6.5M3 11.5h8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg></div><span class="name">Snippets</span></div>
+  <div class="filesel"><button class="filebtn" id="fileBtn" title="Switch file"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 1.75h5.5L13 5.25v9H4z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9.25 1.75v3.75H13" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><b id="fileName">…</b><svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></button></div>
+  <div class="search">
+    <svg class="ico" width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.75" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <input id="q" placeholder="Search shortcuts and text" autocomplete="off" spellcheck="false">
+    <kbd id="qk">/</kbd>
+  </div>
+  <div class="status" id="status" title="Espanso status"><span class="dot"></span><span class="txt">Checking…</span></div>
+  <button class="btn ghost iconbtn" id="themeBtn" title="Switch light / dark"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13.5 9.6A5.75 5.75 0 016.4 2.5a5.75 5.75 0 107.1 7.1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></button>
+  <button class="btn primary" id="saveBtn" disabled title="Save"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="saveTxt">Saved</span></button>
+</header>
+<main>
+  <aside class="side">
+    <div class="sidehead"><span class="count" id="count"></span><button class="sort" id="sortBtn" title="Change sort order">File order</button></div>
+    <div id="banner"></div>
+    <div class="list" id="list" role="listbox" aria-label="Snippets"></div>
+    <div class="sidefoot"><button class="btn" id="newBtn"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>New snippet <kbd style="margin-left:4px" class="modkey">Ctrl N</kbd></button></div>
+  </aside>
+  <section class="pane" id="pane"></section>
+</main>
+<div class="toasts" id="toasts"></div>
+
+<script>/*__JSYAML__*/</script>
+<script>
+"use strict";
+/* ================= state ================= */
+const S = {
+  files: {},          // name -> {name, mtime, text, doc, entries, base, error, comments}
+  order: [],          // file names
+  cur: null,          // current file name
+  sel: null,          // selected entry id
+  q: '',
+  sort: 'file',
+  dismissMerge: false,
+};
+const API = '';
+const VERSION = '__VERSION__';
+const REPO = 'https://github.com/gilikarn/Espanso-Snippets-Manager';
+const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+const MOD = IS_MAC ? '⌘' : 'Ctrl';
+const KNOWN = ['trigger','triggers','label','replace','markdown','html','word','left_word','right_word','propagate_case','search_terms','vars'];
+const MANAGED = {
+  date:      {label:'Date', type:'date', params:{format:'%d/%m/%Y'}},
+  date_iso:  {label:'Date (ISO)', type:'date', params:{format:'%Y-%m-%d'}},
+  date_text: {label:'Date (short)', type:'date', params:{format:'%d %b %Y'}},
+  date_long: {label:'Date (long)', type:'date', params:{format:'%A, %d %B %Y'}},
+  time:      {label:'Time', type:'date', params:{format:'%H:%M'}},
+  clipboard: {label:'Clipboard', type:'clipboard'},
+};
+let uidN = 0; const uid = () => 'e' + (++uidN);
+const $ = (s, el=document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ================= model ================= */
+function fromRaw(m) {
+  const e = {id: uid(), raw: m};
+  if (!m || typeof m !== 'object') { e.locked = 'unknown'; e.triggers = []; e.text=''; return finish(e); }
+  if (m.regex != null) e.locked = 'regex trigger';
+  else if (m.form != null) e.locked = 'form';
+  else if (m.image_path != null) e.locked = 'image';
+  else if (m.trigger == null && m.triggers == null) e.locked = 'no trigger';
+  e.triggers = Array.isArray(m.triggers) ? m.triggers.map(String) : (m.trigger != null ? [String(m.trigger)] : (m.regex != null ? [String(m.regex)] : []));
+  e.kind = m.markdown != null ? 'markdown' : m.html != null ? 'html' : 'replace';
+  const t = m[e.kind]; e.text = t == null ? (m.form != null ? String(m.form) : '') : String(t);
+  e.boundary = (m.word || (m.left_word && m.right_word)) ? 'word' : m.left_word ? 'left' : m.right_word ? 'right' : 'none';
+  e.propagate = !!m.propagate_case;
+  e.label = m.label != null ? String(m.label) : '';
+  e.search = Array.isArray(m.search_terms) ? m.search_terms.map(String) : [];
+  e.vars = Array.isArray(m.vars) ? m.vars : [];
+  e.extra = {};
+  for (const k of Object.keys(m)) if (!KNOWN.includes(k)) e.extra[k] = m[k];
+  return finish(e);
+  function finish(e){ e.orig = JSON.stringify(toRaw(e)); return e; }
+}
+function syncVars(e) {
+  const used = n => e.text.includes('{{' + n + '}}');
+  const out = (e.vars || []).filter(v => !(v && MANAGED[v.name] && !used(v.name) && sameManaged(v)));
+  for (const n of Object.keys(MANAGED)) {
+    if (used(n) && !out.some(v => v && v.name === n)) {
+      const d = MANAGED[n]; const v = {name:n, type:d.type}; if (d.params) v.params = {...d.params}; out.push(v);
+    }
+  }
+  return out;
+}
+function sameManaged(v){ const d = MANAGED[v.name]; return d && v.type === d.type && JSON.stringify(v.params||null) === JSON.stringify(d.params||null); }
+function toRaw(e) {
+  if (e.locked) return e.raw;
+  const o = {};
+  const tr = e.triggers.filter(t => t !== '');
+  if (tr.length === 1) o.trigger = tr[0]; else o.triggers = tr;
+  if (e.label) o.label = e.label;
+  o[e.kind] = e.text;
+  if (e.boundary === 'word') o.word = true;
+  else if (e.boundary === 'left') o.left_word = true;
+  else if (e.boundary === 'right') o.right_word = true;
+  if (e.propagate) o.propagate_case = true;
+  if (e.search.length) o.search_terms = e.search;
+  const vars = syncVars(e); if (vars.length) o.vars = vars;
+  for (const [k, v] of Object.entries(e.extra || {})) o[k] = v;
+  return o;
+}
+function serialize(f) {
+  const doc = {};
+  let placed = false;
+  const src = (f.doc && typeof f.doc === 'object') ? f.doc : {};
+  for (const k of Object.keys(src)) {
+    if (k === 'matches') { doc.matches = f.entries.map(toRaw); placed = true; }
+    else doc[k] = src[k];
+  }
+  if (!placed) doc.matches = f.entries.map(toRaw);
+  return (f.lead || '') + jsyaml.dump(doc, {lineWidth: -1, noRefs: true, quotingType: '"'});
+}
+function loadFile(name, text, mtime) {
+  const f = {name, text, mtime, entries: [], doc: {}, error: null};
+  try {
+    const doc = jsyaml.load(text) || {};
+    if (typeof doc !== 'object' || Array.isArray(doc)) throw new Error('The file is not an Espanso match file.');
+    f.doc = doc;
+    f.entries = (Array.isArray(doc.matches) ? doc.matches : []).map(fromRaw);
+    // The comment block at the top of a file is kept; other comments can't survive a rewrite.
+    const lines = text.split(/\r?\n/); let i = 0;
+    while (i < lines.length && /^\s*(#.*)?$/.test(lines[i])) i++;
+    const lead = lines.slice(0, i);
+    while (lead.length && !lead[lead.length - 1].trim()) lead.pop();
+    f.lead = lead.length ? lead.join('\n') + '\n' : '';
+    f.comments = lines.slice(i).some(l => /^\s*#/.test(l));
+  } catch (err) { f.error = err.message || String(err); }
+  f.base = f.error ? null : serialize(f);
+  S.files[name] = f;
+  return f;
+}
+const cur = () => S.files[S.cur];
+const isDirty = f => f && !f.error && serialize(f) !== f.base;
+const entryDirty = e => JSON.stringify(toRaw(e)) !== e.orig;
+const findEntry = id => cur() && cur().entries.find(e => e.id === id);
+
+/* ================= server ================= */
+async function api(path, opts = {}) {
+  const r = await fetch(API + path, {...opts, headers: {'X-Editor': '1', ...(opts.headers || {})}});
+  let body = null; try { body = await r.json(); } catch {}
+  return {status: r.status, ok: r.ok, body};
+}
+async function loadAll(keep) {
+  const r = await api('/api/files');
+  if (!r.ok) throw new Error('Could not read files');
+  S.order = [];
+  for (const fi of r.body.files || []) {
+    S.order.push(fi.name);
+    if (keep && S.files[fi.name] && isDirty(S.files[fi.name])) continue;
+    loadFile(fi.name, fi.text, fi.mtime);
+  }
+  S.order.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+  function rank(n){ const b = n.split('/').pop(); return n === 'base.yml' ? 1 : b.startsWith('_') ? 2 : 0; }
+}
+async function save() {
+  const f = cur(); if (!f || !isDirty(f)) return;
+  // validate
+  for (const e of f.entries) {
+    if (e.locked) continue;
+    if (!e.triggers.some(t => t.trim())) { select(e.id); toast('Every snippet needs at least one shortcut.', 'err'); focusTriggers(); return; }
+    if ((e.text.match(/\$\|\$/g) || []).length > 1) { select(e.id); toast('Only one cursor position is allowed per snippet.', 'err'); return; }
+    if (e.text === '') { select(e.id); toast('This snippet has no text yet.', 'err'); return; }
+  }
+  const text = serialize(f);
+  try { jsyaml.load(text); } catch (err) { toast('Could not build a valid file: ' + err.message, 'err'); return; }
+  await putFile(f, text, false);
+}
+async function putFile(f, text, force) {
+  setSaveState('saving');
+  let r;
+  try {
+    r = await api('/api/file?name=' + encodeURIComponent(f.name), {method:'PUT', body:text,
+      headers:{'Content-Type':'text/plain; charset=utf-8','X-Expected-Mtime': String(f.mtime), ...(force ? {'X-Force':'1'} : {})}});
+  } catch { setSaveState(); toast('The app has stopped in the background. Open Espanso Snippets again to keep saving.', 'err'); return; }
+  if (r.status === 409) { setSaveState(); conflict(f, r.body, text); return; }
+  if (!r.ok) { setSaveState(); toast('Save failed: ' + ((r.body && r.body.error) || r.status), 'err'); return; }
+  f.mtime = r.body.mtime; f.text = text; f.base = text; f.comments = false; f.warned = false;
+  for (const e of f.entries) e.orig = JSON.stringify(toRaw(e));
+  setSaveState('saved'); renderList(); renderHeader();
+  toast('Saved. Espanso picks it up in a moment.');
+}
+function conflict(f, body, mine) {
+  modal(`<h3>${esc(f.name)} changed on disk</h3><p>The file was edited somewhere else after you opened it. Keep your version or load the one on disk?</p>
+    <div class="row2"><button class="btn" data-a="theirs">Load the file on disk</button><button class="btn primary" data-a="mine">Keep mine</button></div>`, a => {
+      if (a === 'mine') putFile(f, mine, true);
+      if (a === 'theirs') { loadFile(f.name, body.text, body.mtime); S.sel = null; renderAll(); toast('Loaded the version on disk.'); }
+  });
+}
+
+/* ================= rendering ================= */
+function renderAll() { renderHeader(); renderList(); renderPane(); }
+function renderHeader() {
+  const f = cur();
+  $('#fileName').textContent = f ? f.name : '—';
+  setSaveState();
+}
+function setSaveState(st) {
+  const b = $('#saveBtn'), t = $('#saveTxt'), d = isDirty(cur());
+  if (st === 'saving') { b.disabled = true; t.textContent = 'Saving…'; return; }
+  b.disabled = !d; t.textContent = d ? 'Save' : 'Saved';
+  b.title = d ? `Save (${MOD}+S)` : 'All changes saved';
+  document.title = (d ? '• ' : '') + 'Espanso Snippets';
+}
+function chipsHtml(e) {
+  const tr = e.triggers.filter(Boolean);
+  if (!tr.length) return '<span class="chip ph">no shortcut</span>';
+  return tr.map(t => `<span class="chip">${esc(t)}</span>`).join('');
+}
+function visibleEntries() {
+  const f = cur(); if (!f) return [];
+  const q = S.q.trim().toLowerCase();
+  let list = f.entries.filter(e => !q || e.triggers.some(t => t.toLowerCase().includes(q)) || e.text.toLowerCase().includes(q) || e.label.toLowerCase().includes(q) || e.search.some(s => s.toLowerCase().includes(q)));
+  if (S.sort === 'az') list = [...list].sort((a, b) => (a.triggers[0] || '').localeCompare(b.triggers[0] || '', undefined, {sensitivity:'base'}));
+  if (S.sort === 'text') list = [...list].sort((a, b) => a.text.localeCompare(b.text, undefined, {sensitivity:'base'}));
+  return list;
+}
+function dupMap() {
+  const m = new Map();
+  for (const n of S.order) { const f = S.files[n]; if (!f || f.error) continue;
+    for (const e of f.entries) for (const t of new Set(e.triggers)) { if (!t) continue; if (!m.has(t)) m.set(t, []); m.get(t).push({file:n, id:e.id}); } }
+  return m;
+}
+function mergeGroups() {
+  const f = cur(); if (!f || f.error) return [];
+  const g = new Map();
+  for (const e of f.entries) {
+    if (e.locked || e.label || e.search.length || Object.keys(e.extra).length || !e.text) continue;
+    const k = [e.kind, e.text, e.boundary, e.propagate].join('\u0001');
+    if (!g.has(k)) g.set(k, []); g.get(k).push(e);
+  }
+  return [...g.values()].filter(a => a.length > 1);
+}
+function renderList() {
+  const f = cur(), list = $('#list');
+  if (!f) { list.innerHTML = ''; return; }
+  if (f.error) { list.innerHTML = `<div class="emptylist">This file couldn't be read.</div>`; $('#count').textContent = ''; $('#banner').innerHTML=''; return; }
+  const items = visibleEntries(), dups = dupMap();
+  $('#count').textContent = S.q ? `${items.length} of ${f.entries.length}` : `${f.entries.length} snippet${f.entries.length === 1 ? '' : 's'}`;
+  $('#sortBtn').textContent = {file:'File order', az:'A → Z', text:'By text'}[S.sort];
+  const groups = mergeGroups();
+  $('#banner').innerHTML = (!S.dismissMerge && groups.length && !S.q) ?
+    `<div class="banner"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M5 2.5v4.25a2 2 0 002 2h4M5 13.5V9.25M11 6.25L13.5 8.75 11 11.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${groups.length === 1 ? 'Some snippets have' : groups.length + ' groups of snippets have'} identical text.</span><button id="mergeBtn">Merge</button><button class="x" id="mergeX" title="Dismiss">✕</button></div>` : '';
+  if (!items.length) { list.innerHTML = `<div class="emptylist">${S.q ? 'Nothing matches “' + esc(S.q) + '”.' : 'No snippets yet. Add one below.'}</div>`; return; }
+  list.innerHTML = items.map(e => {
+    const dup = e.triggers.some(t => t && (dups.get(t) || []).length > 1);
+    const flags = [];
+    if (e.locked) flags.push(`<span class="tag" title="Uses an advanced Espanso feature">${esc(e.locked.split(' ')[0])}</span>`);
+    if (dup) flags.push(`<span class="tag warn" title="Another snippet uses the same shortcut">dup</span>`);
+    if (entryDirty(e)) flags.push(`<span class="mod" title="Unsaved changes"></span>`);
+    const prev = e.label || e.text.replace(/\$\|\$/g, '').replace(/\s*\n\s*/g, ' ⏎ ');
+    return `<button class="row${e.id === S.sel ? ' sel' : ''}" data-id="${e.id}" role="option" aria-selected="${e.id === S.sel}">
+      <div class="top">${chipsHtml(e)}<span class="flags">${flags.join('')}</span></div>
+      <div class="prev${prev.trim() ? '' : ' empty'}">${prev.trim() ? esc(prev) : 'empty'}</div></button>`;
+  }).join('');
+}
+function renderPane() {
+  const f = cur(), pane = $('#pane');
+  if (!f) { pane.innerHTML = ''; return; }
+  if (f.error) {
+    pane.innerHTML = `<div class="blank"><div><h2>Can't read ${esc(f.name)}</h2><p>Espanso can't read it either until it's fixed:</p><p class="mono">${esc(f.error)}</p><button class="btn" id="openFolder">Open the match folder</button></div></div>`;
+    return;
+  }
+  const e = findEntry(S.sel);
+  if (!e) {
+    pane.innerHTML = `<div class="editor"><div class="card"><div class="blank" style="height:auto;padding:26px 10px"><div>
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none"><rect x="4" y="9" width="36" height="26" rx="6" stroke="var(--border-strong)" stroke-width="2"/><path d="M11 17h3M17 17h3M23 17h3M29 17h4M11 22h4M18 22h8M29 22h4M14 28h16" stroke="var(--faint)" stroke-width="2" stroke-linecap="round"/></svg>
+      <h2>Pick a snippet to edit</h2><div>or create a new one.</div>
+      <div class="shortcuts"><kbd>/</kbd><span>Search</span><kbd>↑ ↓</kbd><span>Move through the list</span><kbd>${MOD} N</kbd><span>New snippet</span><kbd>${MOD} S</kbd><span>Save</span></div>
+      ${f.name.split('/').pop().startsWith('_') ? '<p class="note info" style="margin-top:20px">Files starting with “_” aren\'t loaded by Espanso automatically. Other files can pull them in with <code>imports</code>.</p>' : ''}
+    </div></div></div>${tryCard()}</div>`;
+    bindTry();
+    return;
+  }
+  if (e.locked) {
+    pane.innerHTML = `<div class="editor"><div class="card">
+      <div class="note info">This snippet uses an Espanso feature the editor doesn't cover (${esc(e.locked)}). It's kept exactly as it is. Edit it in the file if you need to change it.</div>
+      <div class="sec"><div class="lbl">Trigger</div><div>${chipsHtml(e)}</div></div>
+      <div class="sec"><div class="lbl">Definition</div><pre class="mono" style="white-space:pre-wrap;padding:12px;display:block">${esc(jsyaml.dump(e.raw, {lineWidth:-1}))}</pre></div>
+      <div class="actions"><button class="btn" id="openFolder">Open the match folder</button><span class="sp"></span><button class="btn danger" id="delBtn">Delete</button></div>
+    </div>${tryCard()}</div>`;
+    bindTry(); return;
+  }
+  const bHelp = {
+    word: 'Expands once you finish the word (type a space, comma, full stop…). Never fires inside longer words.',
+    left: 'Expands immediately, but only when the shortcut starts a word.',
+    right: 'Expands when the shortcut ends a word, even if it\'s glued to the end of another word.',
+    none: 'Expands the moment you type the shortcut, even inside other words.',
+  };
+  const unknownVars = (e.vars || []).filter(v => !(v && MANAGED[v.name] && sameManaged(v)));
+  const extraKeys = Object.keys(e.extra);
+  pane.innerHTML = `<div class="editor">
+   <div class="card">
+    <div class="sec">
+      <div class="lbl">Shortcut <span class="opt">— what you type. Press Enter to add more than one.</span></div>
+      <div class="chips" id="chips">${e.triggers.map((t, i) => `<span class="chip">${esc(t)}<button data-i="${i}" title="Remove" aria-label="Remove ${esc(t)}"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2L2 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>`).join('')}<input id="trigIn" placeholder="${e.triggers.length ? 'Add another…' : 'e.g. :sig'}" spellcheck="false" autocomplete="off"></div>
+      <div class="hint" id="trigHint"></div>
+    </div>
+    <div class="sec">
+      <div class="tbar">
+        <div class="lbl" style="margin:0">Expands to</div><span class="sp"></span>
+        <button class="btn ghost sm" id="insBtn" title="Insert a cursor position, date, time or clipboard"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Insert</button>
+        <div class="seg" id="kindSeg">${[['replace','Text'],['markdown','Markdown'],['html','HTML']].map(([k,l]) => `<button data-k="${k}" class="${e.kind===k?'on':''}">${l}</button>`).join('')}</div>
+      </div>
+      <textarea class="text" id="txt" spellcheck="true" dir="auto" placeholder="The text that replaces the shortcut">${esc(e.text)}</textarea>
+      <div class="preview" id="pvWrap"></div>
+      ${e.kind !== 'replace' ? `<div class="hint">${e.kind === 'markdown' ? 'Pasted as formatted text: <code>**bold**</code>, <code>*italic*</code>, <code>[link](https://…)</code>.' : 'Pasted as formatted text from HTML, e.g. <code>&lt;b&gt;bold&lt;/b&gt;</code>.'} Plain-text apps get the unformatted text.</div>` : ''}
+    </div>
+    <div class="sec">
+      <div class="lbl">Expand when</div>
+      <div class="seg wide" id="bSeg">${[['word','Typed as a separate word'],['left','At the start of a word'],['right','At the end of a word'],['none','Instantly, anywhere']].map(([k,l]) => `<button data-b="${k}" class="${e.boundary===k?'on':''}">${l}</button>`).join('')}</div>
+      <div class="hint">${bHelp[e.boundary]}</div>
+    </div>
+    <div class="sec">
+      <label class="toggle"><input type="checkbox" id="pc" ${e.propagate ? 'checked' : ''}><span class="switch"></span>
+        <span><span class="t1">Match my capitalization</span><br><span class="t2" id="pcHint"></span></span></label>
+    </div>
+    <div class="sec">
+      <div class="lbl">Search bar <span class="opt">— optional, for finding it with <kbd>Alt</kbd> <kbd>Space</kbd></span></div>
+      <div class="grid2">
+        <div><div class="sub">Label</div><input class="field" id="label" dir="auto" value="${esc(e.label)}" placeholder="${esc(e.text.replace(/\$\|\$/g, '').split('\n')[0].slice(0, 40)) || 'Shown instead of the text'}"></div>
+        <div><div class="sub">Extra search words</div><input class="field" id="search" dir="auto" value="${esc(e.search.join(', '))}" placeholder="comma separated"></div>
+      </div>
+    </div>
+    ${(unknownVars.length || extraKeys.length) ? `<div class="kept">Also has ${[...unknownVars.map(v => 'variable “' + esc(v && v.name) + '”'), ...extraKeys.map(k => '“' + esc(k) + '”')].join(', ')}. These are kept as they are.</div>` : ''}
+    <div class="actions">
+      <button class="btn" id="dupBtn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="8.5" height="8.5" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M11 3.2A1.7 1.7 0 009.5 2.5h-5a2 2 0 00-2 2v5c0 .6.3 1.2.7 1.5" stroke="currentColor" stroke-width="1.4"/></svg>Duplicate</button>
+      ${entryDirty(e) && e.orig !== 'null' && !e.isNew ? `<button class="btn ghost" id="revBtn">Undo changes</button>` : ''}
+      <span class="sp"></span>
+      <button class="btn danger" id="delBtn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Delete</button>
+    </div>
+   </div>
+   ${tryCard()}
+  </div>`;
+  bindEditor(e); bindTry();
+  autosize($('#txt'));
+  updateDerived(e);
+}
+function tryCard() {
+  return `<div class="card try">
+    <h3>Try it</h3><p>Type here to test your snippets (unsaved changes included). It works like Espanso, but nothing leaves this box.</p>
+    <textarea id="tryIn" dir="auto" placeholder="${esc(tryPlaceholder())}"></textarea><div class="res" id="tryRes"></div></div>`;
+}
+function tryPlaceholder() {
+  const f = cur(), e = f && f.entries.find(x => !x.locked && x.triggers[0]);
+  if (!e) return 'Type a shortcut here to see it expand';
+  return `Try typing  ${e.triggers[0]}  ${e.boundary === 'word' || e.boundary === 'right' ? 'and a space' : ''}`.trim();
+}
+function autosize(t) { if (!t) return; t.style.height = 'auto'; t.style.height = Math.min(Math.max(t.scrollHeight + 2, 120), 420) + 'px'; }
+function updateDerived(e) {
+  // trigger hint
+  const dups = dupMap(), notes = [];
+  for (const t of e.triggers) {
+    const others = (dups.get(t) || []).filter(x => !(x.file === S.cur && x.id === e.id));
+    if (others.length) notes.push(`<code>${esc(t)}</code> is also used ${others.some(x => x.file !== S.cur) ? 'in ' + esc([...new Set(others.filter(x=>x.file!==S.cur).map(x => x.file))].join(', ')) : 'by another snippet'}. Espanso will ask which one you want.`);
+    if (/\s/.test(t)) notes.push(`<code>${esc(t)}</code> contains a space, so ${e.boundary === 'word' ? 'it only fires if you type the space too' : 'you have to type the space as part of it'}.`);
+  }
+  const h = $('#trigHint'); if (h) { h.innerHTML = notes.join('<br>'); h.style.color = notes.length ? 'var(--warn)' : ''; }
+  // preview
+  const pv = $('#pvWrap');
+  if (pv) {
+    const hasVars = /\{\{\w+\}\}|\$\|\$/.test(e.text);
+    pv.innerHTML = hasVars ? `<span>Preview</span><span class="pv">${renderPreviewHtml(e.text)}</span>` : '';
+  }
+  // propagate hint
+  const pch = $('#pcHint');
+  if (pch) {
+    const t = e.triggers[0] || 'abc', full = (e.text.replace(/\{\{\w+\}\}|\$\|\$/g,'').split('\n')[0] || 'text'), out = full.length > 16 ? full.slice(0, 15).trimEnd() + '…' : full;
+    pch.innerHTML = `<span class="mono">${esc(t.toLowerCase())}</span> → ${esc(out)}, &nbsp;<span class="mono">${esc(cap(t.toLowerCase()))}</span> → ${esc(cap(out))}, &nbsp;<span class="mono">${esc(t.toUpperCase())}</span> → ${esc(out.toUpperCase())}`;
+  }
+}
+const cap = s => s.replace(/\p{L}/u, c => c.toUpperCase());
+function renderPreviewHtml(text) {
+  let h = '';
+  const parts = text.split(/(\{\{\w+\}\}|\$\|\$)/);
+  for (const p of parts) {
+    if (p === '$|$') h += '<span class="caret" title="Cursor ends up here"></span>';
+    else if (/^\{\{\w+\}\}$/.test(p)) h += esc(varValue(p.slice(2, -2)));
+    else h += esc(p);
+  }
+  return h;
+}
+function varValue(name, entry) {
+  const e = entry || findEntry(S.sel);
+  const v = (e && e.vars || []).find(x => x && x.name === name) || (MANAGED[name] && {type: MANAGED[name].type, params: MANAGED[name].params});
+  if (!v) return '‹' + name + '›';
+  if (v.type === 'date') return strftime((v.params && v.params.format) || '%d/%m/%Y', new Date(Date.now() + ((v.params && v.params.offset) || 0) * 1000));
+  if (v.type === 'clipboard') return '‹clipboard›';
+  if (v.type === 'echo') return String(v.params && v.params.echo || '');
+  return '‹' + name + '›';
+}
+function strftime(fmt, d) {
+  const DN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const p = (n, w=2) => String(n).padStart(w, '0');
+  return fmt.replace(/%([a-zA-Z%])/g, (m, c) => ({
+    d:p(d.getDate()), e:String(d.getDate()), m:p(d.getMonth()+1), Y:d.getFullYear(), y:p(d.getFullYear()%100),
+    H:p(d.getHours()), I:p((d.getHours()%12)||12), M:p(d.getMinutes()), S:p(d.getSeconds()), p:d.getHours()<12?'AM':'PM',
+    a:DN[d.getDay()].slice(0,3), A:DN[d.getDay()], b:MN[d.getMonth()].slice(0,3), B:MN[d.getMonth()], j:p(Math.floor((d - new Date(d.getFullYear(),0,0))/864e5),3), '%':'%'
+  }[c] ?? m));
+}
+
+/* ================= editor events ================= */
+function changed(e, opts = {}) {
+  const f = cur();
+  if (f && f.comments && !f.warned) { f.warned = true; toast(`Comments in ${f.name} will be dropped when you save. A backup is kept.`); }
+  setSaveState();
+  if (opts.list !== false) renderListKeepScroll();
+  if (opts.derived !== false) updateDerived(e);
+}
+function renderListKeepScroll() { const l = $('#list'), y = l.scrollTop; renderList(); l.scrollTop = y; }
+function bindEditor(e) {
+  const chips = $('#chips'), inp = $('#trigIn');
+  const addTrig = (focusSel = '#trigIn') => {
+    const vals = inp.value.split(',').map(s => s.trim()).filter(Boolean);
+    if (!vals.length) return false;
+    for (const v of vals) if (!e.triggers.includes(v)) e.triggers.push(v);
+    inp.value = ''; rerenderKeepFocus(focusSel); changed(e); return true;
+  };
+  chips.addEventListener('click', ev => {
+    const b = ev.target.closest('button[data-i]');
+    if (b) { e.triggers.splice(+b.dataset.i, 1); rerenderKeepFocus('#trigIn'); changed(e); return; }
+    inp.focus();
+  });
+  inp.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter' || ev.key === ',' || (ev.key === 'Tab' && inp.value.trim())) { if (addTrig()) ev.preventDefault(); else if (ev.key === 'Enter') { ev.preventDefault(); $('#txt').focus(); } }
+    else if (ev.key === 'Backspace' && !inp.value && e.triggers.length) { ev.preventDefault(); inp.value = e.triggers.pop(); rerenderKeepFocus('#trigIn', inp.value); changed(e); }
+  });
+  inp.addEventListener('blur', () => {
+    if (!inp.value.trim()) return;
+    setTimeout(() => {
+      if (findEntry(S.sel) !== e) { const v = inp.value.split(',').map(s => s.trim()).filter(Boolean); for (const t of v) if (!e.triggers.includes(t)) e.triggers.push(t); setSaveState(); renderListKeepScroll(); return; }
+      const a = document.activeElement, id = a && a.id && a.closest && a.closest('#pane') ? '#' + a.id : null;
+      addTrig(id);
+    }, 0);
+  });
+
+  const txt = $('#txt');
+  txt.addEventListener('input', () => { e.text = txt.value; autosize(txt); changed(e); });
+  $('#kindSeg').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; e.kind = b.dataset.k; rerenderKeepFocus(); changed(e); });
+  $('#bSeg').addEventListener('click', ev => { const b = ev.target.closest('button'); if (!b) return; e.boundary = b.dataset.b; rerenderKeepFocus(); changed(e); });
+  $('#pc').addEventListener('change', ev => { e.propagate = ev.target.checked; changed(e); });
+  $('#label').addEventListener('input', ev => { e.label = ev.target.value; changed(e, {derived:false}); });
+  $('#search').addEventListener('input', ev => { e.search = ev.target.value.split(',').map(s => s.trim()).filter(Boolean); changed(e, {derived:false, list:false}); });
+  $('#dupBtn').addEventListener('click', () => duplicate(e));
+  $('#delBtn').addEventListener('click', () => del(e));
+  const rev = $('#revBtn'); if (rev) rev.addEventListener('click', () => { const f = cur(), i = f.entries.indexOf(e); const n = fromRaw(JSON.parse(e.orig)); n.id = e.id; f.entries[i] = n; renderAll(); });
+  $('#insBtn').addEventListener('click', ev => insertMenu(ev.currentTarget, e));
+}
+function rerenderKeepFocus(sel, val) {
+  const pane = $('#pane'), y = pane.scrollTop;
+  renderPane(); pane.scrollTop = y;
+  if (sel) { const el = $(sel); if (el) { el.focus(); if (val != null) { el.value = val; } } }
+}
+function insertAtCursor(e, token) {
+  const t = $('#txt'); const s = t.selectionStart ?? t.value.length, en = t.selectionEnd ?? s;
+  if (token === '$|$' && t.value.includes('$|$')) { t.value = t.value.replace('$|$', ''); }
+  const st = Math.min(s, t.value.length), ed = Math.min(en, t.value.length);
+  t.value = t.value.slice(0, st) + token + t.value.slice(ed);
+  e.text = t.value; t.focus(); t.selectionStart = t.selectionEnd = st + token.length; autosize(t); changed(e);
+}
+function insertMenu(anchor, e) {
+  const now = new Date();
+  menu(anchor, [
+    {h:'Insert at cursor'},
+    {label:'Cursor position', note:'$|$', act:() => insertAtCursor(e, '$|$')},
+    {label:'Clipboard contents', note:'{{clipboard}}', act:() => insertAtCursor(e, '{{clipboard}}')},
+    {hr:true},{h:'Today'},
+    ...['date','date_iso','date_text','date_long','time'].map(n => ({label: strftime(MANAGED[n].params.format, now), note: '{{' + n + '}}', act:() => insertAtCursor(e, '{{' + n + '}}')})),
+  ], 'right');
+}
+
+/* ================= list actions ================= */
+function select(id, focus) {
+  S.sel = id; renderListKeepScroll(); renderPane();
+  const row = $(`.row[data-id="${id}"]`); if (row) row.scrollIntoView({block:'nearest'});
+  if (focus === 'trig') focusTriggers();
+}
+function focusTriggers(){ const i = $('#trigIn'); if (i) i.focus(); }
+function newSnippet() {
+  const f = cur(); if (!f || f.error) return;
+  const e = fromRaw({trigger:'', replace:''}); e.triggers = []; e.isNew = true; e.orig = 'null';
+  f.entries.unshift(e); S.q = ''; $('#q').value = '';
+  select(e.id, 'trig'); setSaveState();
+}
+function duplicate(e) {
+  const f = cur(), i = f.entries.indexOf(e);
+  const n = fromRaw(JSON.parse(JSON.stringify(toRaw(e)))); n.triggers = []; n.isNew = true; n.orig = 'null';
+  f.entries.splice(i + 1, 0, n); select(n.id, 'trig'); setSaveState();
+  toast('Duplicated. Give it a new shortcut.');
+}
+function del(e) {
+  const f = cur(), i = f.entries.indexOf(e); if (i < 0) return;
+  f.entries.splice(i, 1);
+  const vis = visibleEntries(); S.sel = (vis[Math.min(i, vis.length - 1)] || {}).id || null;
+  renderAll();
+  toast(`Deleted ${e.triggers[0] ? '“' + e.triggers[0] + '”' : 'snippet'}`, '', {label:'Undo', act:() => { f.entries.splice(i, 0, e); S.sel = e.id; renderAll(); }});
+}
+/* ================= try-it playground ================= */
+const SEPS = new Set([' ', ',', '.', '?', '!', ';', ':', '(', ')', '[', ']', '{', '}', '<', '>', '"', "'", '\n', '\t', '\r']);
+function allMatches() {
+  const out = [];
+  for (const n of S.order) { const f = S.files[n]; if (!f || f.error || n.split('/').pop().startsWith('_')) continue;
+    for (const e of f.entries) if (!e.locked) for (const t of e.triggers) if (t) out.push({t, e}); }
+  return out.sort((a, b) => b.t.length - a.t.length);
+}
+function bindTry() {
+  const ta = $('#tryIn'); if (!ta) return;
+  ta.addEventListener('input', ev => {
+    if (!ev.inputType || !ev.inputType.startsWith('insert')) return;
+    const pos = ta.selectionStart, before = ta.value.slice(0, pos);
+    for (const {t, e} of allMatches()) {
+      const r = tryMatch(before, t, e); if (!r) continue;
+      const out = expand(e, r.typed);
+      const head = before.slice(0, r.start), tail = r.sep + ta.value.slice(pos);
+      ta.value = head + out.text + tail;
+      const c = head.length + (out.caret != null ? out.caret : out.text.length + r.sep.length);
+      ta.selectionStart = ta.selectionEnd = c;
+      $('#tryRes').innerHTML = `✓ <span class="mono">${esc(r.typed)}</span> expanded`;
+      return;
+    }
+  });
+}
+function tryMatch(before, t, e) {
+  const ci = e.propagate;
+  const ends = (s) => ci ? s.toLowerCase().endsWith(t.toLowerCase()) : s.endsWith(t);
+  const leftOk = (start) => start === 0 || SEPS.has(before[start - 1]);
+  if (e.boundary === 'none' || e.boundary === 'left') {
+    if (!ends(before)) return null;
+    const start = before.length - t.length;
+    if (e.boundary === 'left' && !leftOk(start)) return null;
+    return {start, typed: before.slice(start), sep: ''};
+  }
+  const last = before.slice(-1);
+  if (!SEPS.has(last)) return null;
+  const body = before.slice(0, -1);
+  if (!ends(body)) return null;
+  const start = body.length - t.length;
+  if (e.boundary === 'word' && !leftOk(start)) return null;
+  return {start, typed: body.slice(start), sep: last};
+}
+function expand(e, typed) {
+  let text = e.text.replace(/\{\{(\w+)\}\}/g, (m, n) => varValue(n, e));
+  if (e.propagate && /[a-z]/i.test(typed)) {
+    if (typed === typed.toUpperCase() && typed.length > 1) text = text.toUpperCase();
+    else { const L = (typed.match(/\p{L}/u) || [''])[0]; if (L && L === L.toUpperCase() && L !== L.toLowerCase()) text = cap(text); }
+  }
+  const ci = text.indexOf('$|$');
+  if (ci >= 0) return {text: text.replace('$|$', ''), caret: ci};
+  return {text, caret: null};
+}
+
+/* ================= menus, modal, toast ================= */
+let openMenu = null;
+function closeMenu(){ if (openMenu) { openMenu.remove(); openMenu = null; } }
+function menu(anchor, items, align) {
+  closeMenu();
+  const m = document.createElement('div'); m.className = 'menu';
+  m.innerHTML = items.map((it, i) => it.hr ? '<hr>' : it.h ? `<div class="mh">${esc(it.h)}</div>` :
+    `<button data-i="${i}" class="${it.on ? 'on' : ''}">${it.icon || ''}<span>${esc(it.label)}</span>${it.note ? `<span class="m2">${esc(it.note)}</span>` : ''}</button>`).join('');
+  document.body.appendChild(m);
+  const r = anchor.getBoundingClientRect();
+  m.style.top = (r.bottom + 6 + window.scrollY) + 'px';
+  const left = align === 'right' ? r.right - m.offsetWidth : r.left;
+  m.style.left = Math.max(8, Math.min(left, innerWidth - m.offsetWidth - 8)) + 'px';
+  m.addEventListener('mousedown', ev => ev.preventDefault());
+  m.addEventListener('click', ev => { const b = ev.target.closest('button[data-i]'); if (!b) return; closeMenu(); items[+b.dataset.i].act(); });
+  openMenu = m;
+}
+document.addEventListener('mousedown', ev => { if (openMenu && !openMenu.contains(ev.target)) closeMenu(); });
+function modal(html, onAction) {
+  const s = document.createElement('div'); s.className = 'scrim';
+  s.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
+  document.body.appendChild(s);
+  const close = () => s.remove();
+  s.addEventListener('click', ev => {
+    if (ev.target === s) return close();
+    const b = ev.target.closest('[data-a]'); if (b) { const r = onAction(b.dataset.a, s); if (r !== false) close(); }
+  });
+  s.addEventListener('keydown', ev => { if (ev.key === 'Escape') close(); });
+  const f = s.querySelector('input') || s.querySelector('.primary'); if (f) f.focus();
+  return s;
+}
+function toast(msg, kind, action) {
+  const t = document.createElement('div'); t.className = 'toast' + (kind === 'err' ? ' err' : '');
+  t.innerHTML = `<span>${esc(msg)}</span>` + (action ? `<button>${esc(action.label)}</button>` : '');
+  if (action) { document.querySelectorAll('.toast.act').forEach(x => x.remove()); t.classList.add('act'); t.querySelector('button').addEventListener('click', () => { action.act(); t.remove(); }); }
+  $('#toasts').appendChild(t);
+  setTimeout(() => t.remove(), action ? 7000 : kind === 'err' ? 6000 : 3200);
+}
+
+/* ================= file switching ================= */
+function fileMenu() {
+  const items = [{h:'Files in your match folder'}];
+  for (const n of S.order) {
+    const f = S.files[n];
+    items.push({label: n, on: n === S.cur, note: f.error ? 'error' : (isDirty(f) ? '● ' : '') + f.entries.length, act: () => switchFile(n)});
+  }
+  items.push({hr:true}, {label:'New file…', act: newFileDialog}, {label:'Open the match folder', act: () => api('/api/openfolder', {method:'POST'})},
+    {hr:true}, {label:'About & help', note:'v' + VERSION, act: () => window.open(REPO + '#readme', '_blank')}, {label:'Report a problem', act: () => window.open(REPO + '/issues/new/choose', '_blank')});
+  menu($('#fileBtn'), items);
+}
+function switchFile(n) {
+  S.cur = n; S.sel = null; S.q = ''; $('#q').value = ''; S.dismissMerge = false;
+  try { localStorage.setItem('espanso-editor-file', n); } catch {}
+  renderAll();
+}
+function newFileDialog() {
+  modal(`<h3>New snippet file</h3><p>Handy for keeping groups apart, for example <code>work</code> and <code>personal</code>. Use <code>folder/name</code> for a subfolder.</p>
+    <input class="field" id="nfName" placeholder="e.g. work" spellcheck="false"><div class="row2"><button class="btn" data-a="cancel">Cancel</button><button class="btn primary" data-a="ok">Create</button></div>`,
+    (a, s) => {
+      if (a !== 'ok') return;
+      let n = s.querySelector('#nfName').value.trim().replace(/\\/g, '/').replace(/\.ya?ml$/i, '');
+      if (!n.split('/').every(seg => /^[\w\- .]+$/.test(seg) && seg !== '.' && seg !== '..') || n.split('/')[0] === 'packages') { toast('Use letters, numbers, spaces, dashes or dots (and / for a subfolder).', 'err'); return false; }
+      n += '.yml';
+      if (S.files[n]) { toast('That file already exists.', 'err'); return false; }
+      const text = 'matches: []\n';
+      api('/api/file?name=' + encodeURIComponent(n), {method:'PUT', body:text, headers:{'X-Create':'1','Content-Type':'text/plain; charset=utf-8'}}).then(async r => {
+        if (!r.ok) { toast('Could not create the file.', 'err'); return; }
+        loadFile(n, text, r.body.mtime); S.order.push(n); switchFile(n); toast('Created ' + n + '.');
+      });
+    });
+  const i = $('#nfName'); i.addEventListener('keydown', ev => { if (ev.key === 'Enter') $('.scrim [data-a="ok"]').click(); });
+}
+
+/* ================= global wiring ================= */
+$('#list').addEventListener('click', ev => { const r = ev.target.closest('.row'); if (r) select(r.dataset.id); });
+$('#banner').addEventListener('click', ev => {
+  if (ev.target.id === 'mergeBtn') {
+    const f = cur(), groups = mergeGroups(), removed = [], keepers = [];
+    for (const g of groups) keepers.push([g[0], g[0].triggers.slice()]);
+    for (const g of groups) for (const o of g.slice(1)) removed.push([f.entries.indexOf(o), o]);
+    removed.sort((a, b) => a[0] - b[0]);
+    for (const g of groups) { const keep = g[0]; for (const o of g.slice(1)) for (const t of o.triggers) if (!keep.triggers.includes(t)) keep.triggers.push(t); }
+    f.entries = f.entries.filter(e => !removed.some(r => r[1] === e));
+    renderAll();
+    toast(`Merged ${removed.length + groups.length} snippets into ${groups.length}.`, '', {label:'Undo', act: () => {
+      for (const [e, t] of keepers) e.triggers = t;
+      for (const [i, e] of removed) f.entries.splice(Math.min(i, f.entries.length), 0, e);
+      renderAll(); }});
+  }
+  if (ev.target.id === 'mergeX') { S.dismissMerge = true; renderList(); }
+});
+$('#pane').addEventListener('click', ev => { if (ev.target.closest('#openFolder')) api('/api/openfolder', {method:'POST'}); });
+$('#fileBtn').addEventListener('click', fileMenu);
+$('#saveBtn').addEventListener('click', save);
+$('#newBtn').addEventListener('click', newSnippet);
+$('#sortBtn').addEventListener('click', () => menu($('#sortBtn'), [
+  {label:'File order', on:S.sort==='file', act:() => setSort('file')},
+  {label:'Shortcut A → Z', on:S.sort==='az', act:() => setSort('az')},
+  {label:'Text A → Z', on:S.sort==='text', act:() => setSort('text')}], 'right'));
+function setSort(s){ S.sort = s; try { localStorage.setItem('espanso-editor-sort', s); } catch {} renderList(); }
+$('#themeBtn').addEventListener('click', () => {
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  const curT = document.documentElement.dataset.theme || (dark ? 'dark' : 'light');
+  const next = curT === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next; try { localStorage.setItem('espanso-editor-theme', next); } catch {}
+});
+const q = $('#q');
+q.addEventListener('input', () => { S.q = q.value; renderList(); $('#qk').classList.toggle('hidden', !!q.value); });
+q.addEventListener('keydown', ev => {
+  const vis = visibleEntries();
+  if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+    ev.preventDefault(); if (!vis.length) return;
+    let i = vis.findIndex(e => e.id === S.sel);
+    i = ev.key === 'ArrowDown' ? Math.min(i + 1, vis.length - 1) : Math.max(i - 1, 0);
+    S.sel = vis[i].id; renderListKeepScroll(); renderPane(); const r = $(`.row[data-id="${S.sel}"]`); if (r) r.scrollIntoView({block:'nearest'});
+  } else if (ev.key === 'Enter') { ev.preventDefault(); if (!vis.some(e => e.id === S.sel) && vis[0]) select(vis[0].id); const t = $('#txt'); if (t) t.focus(); }
+  else if (ev.key === 'Escape') { q.value = ''; S.q = ''; renderList(); $('#qk').classList.remove('hidden'); }
+});
+document.addEventListener('keydown', ev => {
+  const k = ev.key.toLowerCase(), mod = ev.ctrlKey || ev.metaKey;
+  if (mod && k === 's') { ev.preventDefault(); save(); }
+  else if (mod && k === 'n') { ev.preventDefault(); newSnippet(); }
+  else if (mod && k === 'f') { ev.preventDefault(); q.focus(); q.select(); }
+  else if (k === '/' && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { ev.preventDefault(); q.focus(); q.select(); }
+  else if (k === 'escape') closeMenu();
+  else if ((k === 'arrowdown' || k === 'arrowup') && document.activeElement && document.activeElement.classList.contains('row')) {
+    ev.preventDefault(); const vis = visibleEntries(); let i = vis.findIndex(e => e.id === S.sel);
+    i = k === 'arrowdown' ? Math.min(i + 1, vis.length - 1) : Math.max(i - 1, 0);
+    if (vis[i]) { select(vis[i].id); const r = $(`.row[data-id="${vis[i].id}"]`); if (r) r.focus(); }
+  }
+});
+window.addEventListener('beforeunload', ev => { if (S.order.some(n => isDirty(S.files[n]))) { ev.preventDefault(); ev.returnValue = ''; } });
+window.addEventListener('pagehide', () => { try { navigator.sendBeacon(API + '/api/quit', ''); } catch {} });
+window.addEventListener('focus', async () => {
+  // pick up changes made outside the editor (files with unsaved edits are left alone)
+  try {
+    const r = await api('/api/files'); if (!r.ok) return; let changedAny = false;
+    for (const fi of r.body.files || []) {
+      const f = S.files[fi.name];
+      if (!f) { loadFile(fi.name, fi.text, fi.mtime); S.order.push(fi.name); changedAny = true; continue; }
+      if (f.mtime !== fi.mtime && !isDirty(f)) {
+        const selTrig = fi.name === S.cur && findEntry(S.sel) ? findEntry(S.sel).triggers[0] : null;
+        const nf = loadFile(fi.name, fi.text, fi.mtime); changedAny = true;
+        if (fi.name === S.cur) { const m = nf.entries.find(e => e.triggers[0] === selTrig); S.sel = m ? m.id : null; }
+      }
+    }
+    if (changedAny) renderAll();
+  } catch {}
+});
+async function pollStatus() {
+  try {
+    const r = await api('/api/status');
+    const on = r.ok && r.body.running;
+    $('#status').classList.toggle('on', on);
+    $('#status .txt').textContent = on ? 'Espanso is running' : 'Espanso is not running';
+  } catch { $('#status').classList.remove('on'); $('#status .txt').textContent = 'Editor service stopped'; }
+}
+
+(async function init() {
+  document.querySelectorAll('.modkey').forEach(k => k.textContent = MOD + ' N');
+  $('#saveBtn').title = `Save (${MOD}+S)`;
+  try { const t = localStorage.getItem('espanso-editor-theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+  try { const s = localStorage.getItem('espanso-editor-sort'); if (s) S.sort = s; } catch {}
+  try { await loadAll(); }
+  catch {
+    $('#pane').innerHTML = `<div class="blank"><div><h2>The app isn't running</h2><p>Close this tab and open <b>Espanso Snippets</b> again.</p></div></div>`;
+    return;
+  }
+  let pref = null; try { pref = localStorage.getItem('espanso-editor-file'); } catch {}
+  S.cur = (pref && S.files[pref]) ? pref : (S.order.find(n => n !== 'base.yml' && !n.split('/').pop().startsWith('_')) || S.order[0] || null);
+  if (!S.cur) { $('#pane').innerHTML = `<div class="blank"><div><h2>No snippet files found</h2><p>Is Espanso installed? Its match folder is empty or missing.</p></div></div>`; return; }
+  renderAll();
+  pollStatus(); setInterval(pollStatus, 15000);
+  q.focus();
+})();
+</script>
+</body>
+</html>

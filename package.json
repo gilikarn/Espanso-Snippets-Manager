@@ -1,0 +1,30 @@
+{
+  "name": "espanso-snippets-manager",
+  "version": "1.0.0",
+  "description": "A fast, friendly editor for your Espanso snippets. Runs locally, works offline.",
+  "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/gilikarn/Espanso-Snippets-Manager#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gilikarn/Espanso-Snippets-Manager.git"
+  },
+  "bugs": "https://github.com/gilikarn/Espanso-Snippets-Manager/issues",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "package": "node scripts/build.mjs && sh scripts/package.sh",
+    "start": "npm run build && python3 dist/espanso-snippets-manager/server.py",
+    "test": "npm run build && npm run test:server && npm run test:e2e",
+    "test:server": "python3 -m unittest discover -s tests -p \"test_*.py\" -v",
+    "test:e2e": "playwright test",
+    "screenshots": "npm run build && node scripts/screenshots.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "js-yaml": "4.1.0"
+  }
+}

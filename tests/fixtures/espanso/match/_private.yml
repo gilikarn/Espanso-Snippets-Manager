@@ -1,0 +1,3 @@
+matches:
+  - trigger: ":secret"
+    replace: Not loaded automatically by Espanso

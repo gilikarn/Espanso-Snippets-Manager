@@ -1,0 +1,4 @@
+# Installed packages are managed by Espanso and hidden from the editor.
+matches:
+  - trigger: ":pkg"
+    replace: from a package

@@ -1,0 +1,28 @@
+matches:
+  - trigger: ":sig"
+    replace: "Best regards,\nJane Doe\nExample Corp"
+  - triggers: [":addr", ":address"]
+    replace: "221B Baker Street, London"
+    label: Office address
+  - trigger: btw
+    replace: by the way
+    word: true
+  - trigger: omw
+    replace: on my way
+    word: true
+  - trigger: teh
+    replace: the
+    word: true
+    propagate_case: true
+  - trigger: ":shrug"
+    replace: "¯\\_(ツ)_/¯"
+  - trigger: ":kr"
+    replace: Kind regards
+  - trigger: ":kreg"
+    replace: Kind regards
+  - trigger: ":meet"
+    replace: "Does $|$ work for a quick call?"
+  - trigger: ":greet"
+    form: "Hey [[name]], how are you?"
+  - trigger: "café"
+    replace: "Café Olé"

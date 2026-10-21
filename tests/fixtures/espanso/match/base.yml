@@ -1,0 +1,20 @@
+# espanso match file
+# This comment block at the top of the file should survive a save.
+
+matches:
+  # Simple text replacement
+  - trigger: ":espanso"
+    replace: "Hi there!"
+
+  # Print the current date
+  - trigger: ":date"
+    replace: "{{mydate}}"
+    vars:
+      - name: mydate
+        type: date
+        params:
+          format: "%m/%d/%Y"
+
+  # Regex triggers are kept as-is (the editor shows them read-only)
+  - regex: ":hi(?P<person>\\w+)\\."
+    replace: "Hi {{person}}!"

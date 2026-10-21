@@ -1,0 +1,44 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report this! Please remove anything personal from snippets you paste.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Windows, macOS, Linux]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown in the file menu (top left) next to "About & help".
+      placeholder: v1.0.0
+  - type: input
+    id: espanso
+    attributes:
+      label: Espanso version
+      placeholder: "output of: espanso --version"
+  - type: textarea
+    id: config
+    attributes:
+      label: Folders in use
+      description: "Output of `server.ps1 -PrintConfig` (Windows) or `server.py --print-config` (macOS/Linux)."
+      render: json
+  - type: textarea
+    id: sample
+    attributes:
+      label: Sample snippet file (optional)
+      description: The smallest YAML that shows the problem.
+      render: yaml

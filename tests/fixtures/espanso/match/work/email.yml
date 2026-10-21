@@ -1,0 +1,9 @@
+matches:
+  - trigger: ":ty"
+    replace: "Thanks for your email. I'll get back to you by {{tomorrow}}."
+    vars:
+      - name: tomorrow
+        type: date
+        params:
+          format: "%A"
+          offset: 86400

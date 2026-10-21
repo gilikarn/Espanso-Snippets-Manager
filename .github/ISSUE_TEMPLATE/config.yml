@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Espanso questions
+    url: https://espanso.org/docs/
+    about: Questions about Espanso itself (triggers, config, packages) are best answered in the Espanso docs and community.
+  - name: Report a security problem
+    url: https://github.com/gilikarn/Espanso-Snippets-Manager/security/advisories/new
+    about: Please report vulnerabilities privately.
